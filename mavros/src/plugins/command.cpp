@@ -81,6 +81,7 @@ public:
 		trigger_control_srv = cmd_nh.advertiseService("trigger_control", &CommandPlugin::trigger_control_cb, this);
 		trigger_interval_srv = cmd_nh.advertiseService("trigger_interval", &CommandPlugin::trigger_interval_cb, this);
 		vtol_transition_srv = cmd_nh.advertiseService("vtol_transition", &CommandPlugin::vtol_transition_cb, this);
+		emergency_stop_srv = cmd_nh.advertiseService("emergency_stop", &CommandPlugin::emergency_stop_cb, this);
 	}
 
 	Subscriptions get_subscriptions()
@@ -105,6 +106,7 @@ private:
 	ros::ServiceServer trigger_control_srv;
 	ros::ServiceServer trigger_interval_srv;
 	ros::ServiceServer vtol_transition_srv;
+	ros::ServiceServer emergency_stop_srv;
 
 	bool use_comp_id_system_control;
 
@@ -405,6 +407,17 @@ private:
 			0, 0, 0, 0, 0, 0,
 			res.success, res.result);
 	}
+
+    bool emergency_stop_cb(mavros_msgs::CommandBool::Request &req,
+        mavros_msgs::CommandBool::Response &res)
+    {
+        using mavlink::common::MAV_CMD;
+        return send_command_long_and_wait(false,
+                                          enum_value(MAV_CMD::COMPONENT_ARM_DISARM), 1,
+                                          0.0,
+                                          21196, 0, 0, 0, 0, 0,
+                                          res.success, res.result);
+    }
 };
 }	// namespace std_plugins
 }	// namespace mavros
